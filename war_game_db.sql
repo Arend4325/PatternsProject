@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2025 at 07:33 AM
+-- Generation Time: Nov 26, 2025 at 11:07 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -37,20 +37,42 @@ CREATE TABLE `games` (
   `totalWars` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `games`
+-- Table structure for table `players`
 --
 
-INSERT INTO `games` (`gameID`, `player1ID`, `player2ID`, `winnerID`, `datePlayed`, `totalRounds`, `totalWars`) VALUES
-(1, 1, 2, 2, '2025-11-29 15:57:37', 0, 0),
-(2, 1, 2, 1, '2025-11-29 16:03:29', 387, 71),
-(3, 1, 2, 2, '2025-11-29 16:24:58', 25, 3),
-(4, 1, 2, 1, '2025-11-29 16:26:35', 25, 2),
-(5, 1, 2, 2, '2025-11-29 16:31:26', 26, 1),
-(6, 1, 2, 1, '2025-11-30 23:30:51', 25, 1),
-(7, 1, 2, 1, '2025-12-01 00:57:45', 25, 1),
-(8, 1, 2, 2, '2025-12-01 01:14:51', 25, 0),
-(9, 4, 1, 4, '2025-12-01 01:27:41', 25, 0);
+CREATE TABLE `players` (
+  `playerID` int(11) NOT NULL,
+  `firstName` varchar(50) NOT NULL,
+  `lastName` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `totalWins` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `players`
+--
+
+INSERT INTO `players` (`playerID`, `firstName`, `lastName`, `email`, `totalWins`) VALUES
+(1, 'John', 'Doe', 'johnd@gmail.com', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rounds`
+--
+
+CREATE TABLE `rounds` (
+  `roundID` int(11) NOT NULL,
+  `gameID` int(11) NOT NULL,
+  `roundNumber` int(11) NOT NULL,
+  `player1Card` varchar(10) NOT NULL,
+  `player2Card` varchar(10) NOT NULL,
+  `roundWinner` int(11) DEFAULT NULL,
+  `isWarRound` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -66,6 +88,20 @@ ALTER TABLE `games`
   ADD KEY `winnerID` (`winnerID`);
 
 --
+-- Indexes for table `players`
+--
+ALTER TABLE `players`
+  ADD PRIMARY KEY (`playerID`);
+
+--
+-- Indexes for table `rounds`
+--
+ALTER TABLE `rounds`
+  ADD PRIMARY KEY (`roundID`),
+  ADD KEY `gameID` (`gameID`),
+  ADD KEY `roundWinner` (`roundWinner`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -73,7 +109,19 @@ ALTER TABLE `games`
 -- AUTO_INCREMENT for table `games`
 --
 ALTER TABLE `games`
-  MODIFY `gameID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `gameID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `players`
+--
+ALTER TABLE `players`
+  MODIFY `playerID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `rounds`
+--
+ALTER TABLE `rounds`
+  MODIFY `roundID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -86,6 +134,13 @@ ALTER TABLE `games`
   ADD CONSTRAINT `games_ibfk_1` FOREIGN KEY (`player1ID`) REFERENCES `players` (`playerID`),
   ADD CONSTRAINT `games_ibfk_2` FOREIGN KEY (`player2ID`) REFERENCES `players` (`playerID`),
   ADD CONSTRAINT `games_ibfk_3` FOREIGN KEY (`winnerID`) REFERENCES `players` (`playerID`);
+
+--
+-- Constraints for table `rounds`
+--
+ALTER TABLE `rounds`
+  ADD CONSTRAINT `rounds_ibfk_1` FOREIGN KEY (`gameID`) REFERENCES `games` (`gameID`),
+  ADD CONSTRAINT `rounds_ibfk_2` FOREIGN KEY (`roundWinner`) REFERENCES `players` (`playerID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
