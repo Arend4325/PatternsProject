@@ -1,6 +1,6 @@
 package com.wargame.controllers;
 
-import com.wargame.ConnectionManager;
+import com.wargame.database.ConnectionManager;
 import com.wargame.models.Round;
 
 import java.sql.*;

@@ -1,4 +1,4 @@
-package com.wargame;
+package com.wargame.database;
 
 import com.wargame.config.ConfigManager;
 import java.sql.Connection;

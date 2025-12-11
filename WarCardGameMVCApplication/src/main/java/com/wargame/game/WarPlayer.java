@@ -1,5 +1,7 @@
 package com.wargame.game;
 
+import com.wargame.factory.DeckFactory;
+
 public class WarPlayer {
 
     private final String name;
@@ -7,7 +9,7 @@ public class WarPlayer {
 
     public WarPlayer(String name) {
         this.name = name;
-        this.playerDeck = new Deck(54);
+        this.playerDeck = DeckFactory.createEmptyDeck();
     }
 
     public String getName() {

@@ -1,5 +1,6 @@
 package com.wargame.game;
 
+import com.wargame.factory.DeckFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,32 +11,20 @@ public class WarGame {
     private final WarPlayer p1;
     private final WarPlayer p2;
 
-    private final Deck tableDeck = new Deck(54);
+    private final Deck tableDeck = DeckFactory.createEmptyDeck();
 
     private int totalRounds = 0;
     private int totalWars = 0;
+
+    private int p1RoundWins = 0;
+    private int p2RoundWins = 0;
+
 
     private final List<RoundRecord> roundHistory = new ArrayList<>();
 
     public WarGame(WarPlayer p1, WarPlayer p2) {
         this.p1 = p1;
         this.p2 = p2;
-    }
-
-    public static class RoundRecord {
-        public final int roundNumber;
-        public final Card p1Card;
-        public final Card p2Card;
-        public final int winner;
-        public final boolean war;
-
-        public RoundRecord(int roundNumber, Card c1, Card c2, int winner, boolean war) {
-            this.roundNumber = roundNumber;
-            this.p1Card = c1;
-            this.p2Card = c2;
-            this.winner = winner;
-            this.war = war;
-        }
     }
 
     public int getTotalRounds() {
@@ -58,81 +47,128 @@ public class WarGame {
         return p2.getName();
     }
 
-    public void setupGame() {
+    public int getP1RoundWins() {
+        return p1RoundWins;
+    }
 
-        Deck deck = new Deck();
+    public int getP2RoundWins() {
+        return p2RoundWins;
+    }
 
-        for (int i = 0; i < 4; i++) {
-            deck.shuffle();
-        }
+    public static class RoundRecord {
+        public int roundNumber;
+        public Card p1Card;
+        public Card p2Card;
+        public int winner;  // 1 = p1, 2 = p2, 0 = tie
+        public boolean war;
 
-        for (int i = 0; i < 27; i++) {
-            p1.getPlayerDeck().addToDeck(deck.dealCard(2 * i));
-            p2.getPlayerDeck().addToDeck(deck.dealCard(2 * i + 1));
+        public RoundRecord(int roundNumber, Card c1, Card c2, int winner, boolean war) {
+            this.roundNumber = roundNumber;
+            this.p1Card = c1;
+            this.p2Card = c2;
+            this.winner = winner;
+            this.war = war;
         }
     }
 
-    private int playSingleRound(boolean countToMax) {
+    public void setupGame() {
 
-        if (countToMax) {
-            totalRounds++;
+        //factory
+        Deck deck = DeckFactory.createShuffledDeck();
+
+        // deal 27 cards each (54 total)
+        for (int i = 0; i < 27; i++) {
+            p1.getPlayerDeck().addToDeck(deck.dealCard());
+            p2.getPlayerDeck().addToDeck(deck.dealCard());
         }
-
-        Card c1 = p1.getPlayerDeck().dealCard();
-        Card c2 = p2.getPlayerDeck().dealCard();
-
-        tableDeck.addToDeck(c1);
-        tableDeck.addToDeck(c2);
-
-        int winner;
-
-        if (c1.getValue() > c2.getValue()) {
-            winner = 1;
-            p1.getPlayerDeck().transferCardsFrom(tableDeck);
-        } else if (c2.getValue() > c1.getValue()) {
-            winner = 2;
-            p2.getPlayerDeck().transferCardsFrom(tableDeck);
-        } else {
-            winner = 0;
-            totalWars++;
-        }
-
-        roundHistory.add(new RoundRecord(
-                totalRounds,
-                c1,
-                c2,
-                winner,
-                winner == 0
-        ));
-
-        return winner;
     }
 
     public String playGame() {
 
-        while (totalRounds < MAX_ROUNDS &&
-                p1.getPlayerDeck().getNumCards() > 0 &&
-                p2.getPlayerDeck().getNumCards() > 0) {
+        while (p1.getPlayerDeck().getNumCards() > 0 &&
+                p2.getPlayerDeck().getNumCards() > 0 &&
+                totalRounds < MAX_ROUNDS) {
 
-            playSingleRound(true);
+            totalRounds++;
+
+            Card c1 = p1.getPlayerDeck().dealCard();
+            Card c2 = p2.getPlayerDeck().dealCard();
+
+            tableDeck.addToDeck(c1);
+            tableDeck.addToDeck(c2);
+
+            int winner;
+
+            if (c1.getValue() > c2.getValue()) {
+                winner = 1;
+                p1RoundWins++;   // <-- count win
+                p1.getPlayerDeck().transferCardsFrom(tableDeck);
+            }
+            else if (c2.getValue() > c1.getValue()) {
+                winner = 2;
+                p2RoundWins++;   // <-- count win
+                p2.getPlayerDeck().transferCardsFrom(tableDeck);
+            }
+            else {
+                winner = 0;
+                totalWars++;
+            }
+
+
+            roundHistory.add(new RoundRecord(
+                    totalRounds,
+                    c1,
+                    c2,
+                    winner,
+                    winner == 0
+            ));
         }
 
+        // Winner by card count
         int p1Cards = p1.getPlayerDeck().getNumCards();
         int p2Cards = p2.getPlayerDeck().getNumCards();
 
-        if (p1Cards > p2Cards) return p1.getName();
-        if (p2Cards > p1Cards) return p2.getName();
+        if (p1Cards != p2Cards) {
+            return p1Cards > p2Cards ? p1.getName() : p2.getName();
+        }
 
+        // Sudden death tiebreaker
         while (true) {
-
             if (p1.getPlayerDeck().getNumCards() == 0) return p2.getName();
             if (p2.getPlayerDeck().getNumCards() == 0) return p1.getName();
 
-            int result = playSingleRound(false);
+            Card c1 = p1.getPlayerDeck().dealCard();
+            Card c2 = p2.getPlayerDeck().dealCard();
 
-            if (result == 1) return p1.getName();
-            if (result == 2) return p2.getName();
+            totalRounds++;
+
+            int winner;
+            if (c1.getValue() > c2.getValue()) {
+                winner = 1;
+                p1RoundWins++;  // count sudden-death rounds too
+            }
+            else if (c2.getValue() > c1.getValue()) {
+                winner = 2;
+                p2RoundWins++;
+            }
+            else {
+                winner = 0;
+            }
+
+
+            roundHistory.add(new RoundRecord(
+                    totalRounds,
+                    c1,
+                    c2,
+                    winner,
+                    winner == 0
+            ));
+
+            if (winner == 1) return p1.getName();
+            if (winner == 2) return p2.getName();
         }
     }
+
+
 
 }

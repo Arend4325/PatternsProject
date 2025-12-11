@@ -1,6 +1,6 @@
 package com.wargame.controllers;
 
-import com.wargame.ConnectionManager;
+import com.wargame.database.ConnectionManager;
 import com.wargame.models.Game;
 
 import java.sql.*;
@@ -9,21 +9,27 @@ import java.util.List;
 
 public class GameController {
 
+    // ==============================
+    // SAVE GAME
+    // ==============================
     public int saveGame(Game game) {
         String sql = """
                 INSERT INTO games
-                (player1ID, player2ID, winnerID, datePlayed, totalRounds, totalWars)
-                VALUES (?, ?, ?, NOW(), ?, ?)
+                (player1ID, player2ID, winnerID, datePlayed,
+                 p1RoundWins, p2RoundWins, totalWars)
+                VALUES (?, ?, ?, NOW(), ?, ?, ?)
                 """;
 
         try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt =
+                     conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, game.getPlayer1ID());
             stmt.setInt(2, game.getPlayer2ID());
             stmt.setInt(3, game.getWinnerID());
-            stmt.setInt(4, game.getTotalRounds());
-            stmt.setInt(5, game.getTotalWars());
+            stmt.setInt(4, game.getP1RoundWins());
+            stmt.setInt(5, game.getP2RoundWins());
+            stmt.setInt(6, game.getTotalWars());
 
             int rows = stmt.executeUpdate();
 
@@ -44,6 +50,9 @@ public class GameController {
     }
 
 
+    // ==============================
+    // GET ALL GAMES
+    // ==============================
     public List<Game> getAllGames() {
         List<Game> games = new ArrayList<>();
         String sql = "SELECT * FROM games ORDER BY datePlayed DESC";
@@ -53,15 +62,7 @@ public class GameController {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                games.add(new Game(
-                        rs.getInt("gameID"),
-                        rs.getInt("player1ID"),
-                        rs.getInt("player2ID"),
-                        rs.getInt("winnerID"),
-                        rs.getTimestamp("datePlayed").toLocalDateTime(),
-                        rs.getInt("totalRounds"),
-                        rs.getInt("totalWars")
-                ));
+                games.add(mapGame(rs));
             }
 
         } catch (SQLException e) {
@@ -71,6 +72,10 @@ public class GameController {
         return games;
     }
 
+
+    // ==============================
+    // GET GAME BY ID
+    // ==============================
     public Game getGameById(int gameID) {
         String sql = "SELECT * FROM games WHERE gameID = ?";
 
@@ -81,15 +86,7 @@ public class GameController {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new Game(
-                        rs.getInt("gameID"),
-                        rs.getInt("player1ID"),
-                        rs.getInt("player2ID"),
-                        rs.getInt("winnerID"),
-                        rs.getTimestamp("datePlayed").toLocalDateTime(),
-                        rs.getInt("totalRounds"),
-                        rs.getInt("totalWars")
-                );
+                return mapGame(rs);
             }
 
         } catch (SQLException e) {
@@ -99,6 +96,10 @@ public class GameController {
         return null;
     }
 
+
+    // ==============================
+    // GET GAMES FOR A PLAYER
+    // ==============================
     public List<Game> getGamesForPlayer(int playerID) {
         List<Game> games = new ArrayList<>();
 
@@ -117,15 +118,7 @@ public class GameController {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                games.add(new Game(
-                        rs.getInt("gameID"),
-                        rs.getInt("player1ID"),
-                        rs.getInt("player2ID"),
-                        rs.getInt("winnerID"),
-                        rs.getTimestamp("datePlayed").toLocalDateTime(),
-                        rs.getInt("totalRounds"),
-                        rs.getInt("totalWars")
-                ));
+                games.add(mapGame(rs));
             }
 
         } catch (SQLException e) {
@@ -135,6 +128,10 @@ public class GameController {
         return games;
     }
 
+
+    // ==============================
+    // DELETE GAME
+    // ==============================
     public boolean deleteGame(int gameID) {
         String sql = "DELETE FROM games WHERE gameID = ?";
 
@@ -148,5 +145,22 @@ public class GameController {
             System.err.println("Error deleting game: " + e.getMessage());
             return false;
         }
+    }
+
+
+    // ==============================
+    // MAP RESULTSET → GAME OBJECT
+    // ==============================
+    private Game mapGame(ResultSet rs) throws SQLException {
+        return new Game(
+                rs.getInt("gameID"),
+                rs.getInt("player1ID"),
+                rs.getInt("player2ID"),
+                rs.getInt("winnerID"),
+                rs.getTimestamp("datePlayed").toLocalDateTime(),
+                rs.getInt("p1RoundWins"),
+                rs.getInt("p2RoundWins"),
+                rs.getInt("totalWars")
+        );
     }
 }

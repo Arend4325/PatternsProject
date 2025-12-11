@@ -4,6 +4,7 @@ import com.wargame.controllers.GameController;
 import com.wargame.controllers.PlayerController;
 import com.wargame.controllers.RoundController;
 import com.wargame.factory.GameFactory;
+import com.wargame.threads.PostGameStatsThread;
 import com.wargame.threads.WarCounterThread;
 import com.wargame.game.WarGame;
 import com.wargame.models.Game;
@@ -105,6 +106,7 @@ public class GameplayView {
 
     private void finishGame(Stage stage) {
 
+        new PostGameStatsThread(game).start();
         btnNext.setDisable(true);
 
         String winnerName = finalWinner;
@@ -112,19 +114,22 @@ public class GameplayView {
                 ? p1.getPlayerID()
                 : p2.getPlayerID();
 
+        // Update player wins
         new PlayerController().increaseWins(winnerID);
 
         Game savedGame = new Game(
                 p1.getPlayerID(),
                 p2.getPlayerID(),
                 winnerID,
-                game.getTotalRounds(),
+                game.getP1RoundWins(),   // NEW
+                game.getP2RoundWins(),   // NEW
                 game.getTotalWars()
         );
 
         GameController gc = new GameController();
         int gameID = gc.saveGame(savedGame);
 
+        // Save all rounds
         RoundController rc = new RoundController();
         for (WarGame.RoundRecord rr : game.getRoundHistory()) {
             rc.saveRound(new Round(
@@ -139,12 +144,13 @@ public class GameplayView {
 
         new Alert(
                 Alert.AlertType.INFORMATION,
-                "Winner: " + winnerName + "\nGame saved as ID: " + gameID
+                "Winner: " + winnerName +
+                        "\nGame saved as ID: " + gameID
         ).show();
 
         new WarCounterThread(game).start();
-
         stage.close();
     }
+
 
 }
