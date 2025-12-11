@@ -3,7 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
+<<<<<<< HEAD
 -- Generation Time: Dec 11, 2025 at 01:21 AM
+=======
+-- Generation Time: Nov 26, 2025 at 11:07 PM
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,10 +42,13 @@ CREATE TABLE `games` (
   `totalWars` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `games`
+-- Table structure for table `players`
 --
 
+<<<<<<< HEAD
 INSERT INTO `games` (`gameID`, `player1ID`, `player2ID`, `winnerID`, `p1RoundWins`, `p2RoundWins`, `datePlayed`, `totalWars`) VALUES
 (1, 1, 2, 2, 0, 0, '2025-11-29 15:57:37', 0),
 (2, 1, 2, 1, 0, 0, '2025-11-29 16:03:29', 71),
@@ -64,6 +71,8 @@ INSERT INTO `games` (`gameID`, `player1ID`, `player2ID`, `winnerID`, `p1RoundWin
 -- Table structure for table `players`
 --
 
+=======
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 CREATE TABLE `players` (
   `playerID` int(11) NOT NULL,
   `firstName` varchar(50) NOT NULL,
@@ -77,9 +86,13 @@ CREATE TABLE `players` (
 --
 
 INSERT INTO `players` (`playerID`, `firstName`, `lastName`, `email`, `totalWins`) VALUES
+<<<<<<< HEAD
 (1, 'John', 'Doe', 'johnd@gmail.com', 5),
 (2, 'Sarah', 'Lee', 'sarahlee@gmail.com', 7),
 (4, 'Jon', 'Jones', 'jonjufc@yahoo.ca', 3);
+=======
+(1, 'John', 'Doe', 'johnd@gmail.com', 0);
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 
 -- --------------------------------------------------------
 
@@ -91,6 +104,7 @@ CREATE TABLE `rounds` (
   `roundID` int(11) NOT NULL,
   `gameID` int(11) NOT NULL,
   `roundNumber` int(11) NOT NULL,
+<<<<<<< HEAD
   `player1Card` varchar(50) NOT NULL,
   `player2Card` varchar(50) NOT NULL,
   `roundWinner` int(11) DEFAULT NULL,
@@ -377,6 +391,13 @@ INSERT INTO `rounds` (`roundID`, `gameID`, `roundNumber`, `player1Card`, `player
 (275, 14, 23, '6 of Spades', '3 of Hearts', 1, 0),
 (276, 14, 24, '6 of Spades', '5 of Clubs', 1, 0),
 (277, 14, 25, '6 of Spades', '8 of Clubs', 2, 0);
+=======
+  `player1Card` varchar(10) NOT NULL,
+  `player2Card` varchar(10) NOT NULL,
+  `roundWinner` int(11) DEFAULT NULL,
+  `isWarRound` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 
 --
 -- Indexes for dumped tables
@@ -402,8 +423,13 @@ ALTER TABLE `players`
 --
 ALTER TABLE `rounds`
   ADD PRIMARY KEY (`roundID`),
+<<<<<<< HEAD
   ADD KEY `roundWinner` (`roundWinner`),
   ADD KEY `rounds_ibfk_1` (`gameID`);
+=======
+  ADD KEY `gameID` (`gameID`),
+  ADD KEY `roundWinner` (`roundWinner`);
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -413,19 +439,31 @@ ALTER TABLE `rounds`
 -- AUTO_INCREMENT for table `games`
 --
 ALTER TABLE `games`
+<<<<<<< HEAD
   MODIFY `gameID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+=======
+  MODIFY `gameID` int(11) NOT NULL AUTO_INCREMENT;
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 
 --
 -- AUTO_INCREMENT for table `players`
 --
 ALTER TABLE `players`
+<<<<<<< HEAD
   MODIFY `playerID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+=======
+  MODIFY `playerID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 
 --
 -- AUTO_INCREMENT for table `rounds`
 --
 ALTER TABLE `rounds`
+<<<<<<< HEAD
   MODIFY `roundID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=278;
+=======
+  MODIFY `roundID` int(11) NOT NULL AUTO_INCREMENT;
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 
 --
 -- Constraints for dumped tables
@@ -443,7 +481,12 @@ ALTER TABLE `games`
 -- Constraints for table `rounds`
 --
 ALTER TABLE `rounds`
+<<<<<<< HEAD
   ADD CONSTRAINT `rounds_ibfk_1` FOREIGN KEY (`gameID`) REFERENCES `games` (`gameID`) ON DELETE CASCADE ON UPDATE CASCADE;
+=======
+  ADD CONSTRAINT `rounds_ibfk_1` FOREIGN KEY (`gameID`) REFERENCES `games` (`gameID`),
+  ADD CONSTRAINT `rounds_ibfk_2` FOREIGN KEY (`roundWinner`) REFERENCES `players` (`playerID`);
+>>>>>>> 6a9286c8e75698d6a8d8026386b34b399618b0e2
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
