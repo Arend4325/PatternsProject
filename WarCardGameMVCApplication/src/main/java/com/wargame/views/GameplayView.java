@@ -4,18 +4,18 @@ import com.wargame.controllers.GameController;
 import com.wargame.controllers.PlayerController;
 import com.wargame.controllers.RoundController;
 import com.wargame.factory.GameFactory;
-import com.wargame.threads.PostGameStatsThread;
-import com.wargame.threads.WarCounterThread;
 import com.wargame.game.WarGame;
 import com.wargame.models.Game;
 import com.wargame.models.Player;
 import com.wargame.models.Round;
+import com.wargame.threads.PostGameStatsThread;
+import com.wargame.threads.WarCounterThread;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class GameplayView {
@@ -45,15 +45,18 @@ public class GameplayView {
 
     public void show(Stage stage) {
 
-        stage.setTitle("Gameplay - " + p1.getFirstName() + " vs " + p2.getFirstName());
+        stage.setTitle("Gameplay");
+
+        Label title = new Label("WAR GAMEPLAY");
+        title.getStyleClass().add("title-label");
 
         Label lblPlayers = new Label(
                 p1.getFirstName() + " vs " + p2.getFirstName()
         );
-        lblPlayers.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        VBox topBox = new VBox(10, lblPlayers, lblStatus);
-        topBox.setPadding(new Insets(10));
+        VBox top = new VBox(10, title, lblPlayers, lblStatus);
+        top.setAlignment(Pos.CENTER);
+        top.setPadding(new Insets(20));
 
         Button btnFinish = new Button("Finish Game");
         btnFinish.setDisable(true);
@@ -61,75 +64,74 @@ public class GameplayView {
         btnNext.setOnAction(e -> advanceRound(btnFinish));
         btnFinish.setOnAction(e -> finishGame(stage));
 
-        HBox bottomButtons = new HBox(10, btnNext, btnFinish);
-        bottomButtons.setPadding(new Insets(10));
+        HBox buttons = new HBox(12, btnNext, btnFinish);
+        buttons.setAlignment(Pos.CENTER);
+        buttons.setPadding(new Insets(10));
 
         BorderPane root = new BorderPane();
-        root.setTop(topBox);
-        root.setBottom(bottomButtons);
+        root.setTop(top);
+        root.setBottom(buttons);
 
-        stage.setScene(new Scene(root, 400, 250));
+        applyBackground(root);
+
+        Scene scene = new Scene(root, 500, 350);
+        scene.getStylesheets().add(
+                getClass().getResource("/wartheme.css").toExternalForm()
+        );
+
+        stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
     private void advanceRound(Button btnFinish) {
-
         if (currentRoundIndex >= game.getRoundHistory().size()) {
-            lblStatus.setText("All rounds complete. Click Finish Game.");
+            lblStatus.setText("All rounds complete.");
             btnNext.setDisable(true);
             btnFinish.setDisable(false);
             return;
         }
 
-        WarGame.RoundRecord r = game.getRoundHistory().get(currentRoundIndex);
+        WarGame.RoundRecord r =
+                game.getRoundHistory().get(currentRoundIndex);
 
-        String roundText = "Round " + r.roundNumber + ":\n" +
-                p1.getFirstName() + " drew: " + r.p1Card + "\n" +
-                p2.getFirstName() + " drew: " + r.p2Card + "\n";
+        lblStatus.setText(
+                "Round " + r.roundNumber +
+                        "\n" + p1.getFirstName() + ": " + r.p1Card +
+                        "\n" + p2.getFirstName() + ": " + r.p2Card +
+                        "\n" + (r.winner == 0 ? "WAR!" :
+                        r.winner == 1 ? p1.getFirstName() : p2.getFirstName())
+        );
 
-        if (r.winner == 1) {
-            roundText += "Winner: " + p1.getFirstName();
-        } else if (r.winner == 2) {
-            roundText += "Winner: " + p2.getFirstName();
-        } else {
-            roundText += "Tie (WAR!)";
-        }
-
-        lblStatus.setText(roundText);
         currentRoundIndex++;
 
         if (currentRoundIndex == game.getRoundHistory().size()) {
-            btnFinish.setDisable(false);
             btnNext.setDisable(true);
+            btnFinish.setDisable(false);
         }
     }
 
     private void finishGame(Stage stage) {
 
+        new WarCounterThread(game).start();
         new PostGameStatsThread(game).start();
-        btnNext.setDisable(true);
-
-        String winnerName = finalWinner;
-        int winnerID = winnerName.equals(p1.getFirstName())
+        int winnerID = finalWinner.equals(p1.getFirstName())
                 ? p1.getPlayerID()
                 : p2.getPlayerID();
 
-        // Update player wins
         new PlayerController().increaseWins(winnerID);
 
         Game savedGame = new Game(
                 p1.getPlayerID(),
                 p2.getPlayerID(),
                 winnerID,
-                game.getP1RoundWins(),   // NEW
-                game.getP2RoundWins(),   // NEW
+                game.getP1RoundWins(),
+                game.getP2RoundWins(),
                 game.getTotalWars()
         );
 
-        GameController gc = new GameController();
-        int gameID = gc.saveGame(savedGame);
+        int gameID = new GameController().saveGame(savedGame);
 
-        // Save all rounds
         RoundController rc = new RoundController();
         for (WarGame.RoundRecord rr : game.getRoundHistory()) {
             rc.saveRound(new Round(
@@ -142,15 +144,24 @@ public class GameplayView {
             ));
         }
 
-        new Alert(
-                Alert.AlertType.INFORMATION,
-                "Winner: " + winnerName +
+        new Alert(Alert.AlertType.INFORMATION,
+                "Winner: " + finalWinner +
                         "\nGame saved as ID: " + gameID
         ).show();
 
-        new WarCounterThread(game).start();
         stage.close();
     }
 
-
+    private void applyBackground(Pane root) {
+        BackgroundImage bg = new BackgroundImage(
+                new Image(getClass()
+                        .getResource("/images/table_bg.png")
+                        .toExternalForm()),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(100, 100, true, true, true, true)
+        );
+        root.setBackground(new Background(bg));
+    }
 }

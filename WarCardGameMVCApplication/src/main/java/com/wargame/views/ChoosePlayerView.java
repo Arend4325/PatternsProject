@@ -4,9 +4,11 @@ import com.wargame.controllers.PlayerController;
 import com.wargame.models.Player;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -19,21 +21,20 @@ public class ChoosePlayerView {
 
         stage.setTitle("Start New Game");
 
-        // ----------------------------------------------------
-        // Dropdowns
-        // ----------------------------------------------------
+        Label title = new Label("START NEW GAME");
+        title.getStyleClass().add("title-label");
+
         ComboBox<Player> cmbPlayer1 = new ComboBox<>();
         ComboBox<Player> cmbPlayer2 = new ComboBox<>();
 
-        cmbPlayer1.setPrefWidth(220);
-        cmbPlayer2.setPrefWidth(220);
+        cmbPlayer1.setPrefWidth(240);
+        cmbPlayer2.setPrefWidth(240);
 
         List<Player> players = playerController.getAllPlayers();
 
         if (players.size() < 2) {
-            Alert a = new Alert(Alert.AlertType.WARNING,
-                    "You need at least 2 players to start a game.");
-            a.show();
+            new Alert(Alert.AlertType.WARNING,
+                    "You need at least 2 players to start a game.").show();
             stage.close();
             return;
         }
@@ -44,20 +45,13 @@ public class ChoosePlayerView {
         cmbPlayer1.setPromptText("Select Player 1");
         cmbPlayer2.setPromptText("Select Player 2");
 
-        // ----------------------------------------------------
-        // Buttons
-        // ----------------------------------------------------
         Button btnStart = new Button("Begin Game");
-        Button btnBack  = new Button("Back to Menu");
+        Button btnBack = new Button("Back");
 
-        btnStart.setPrefWidth(220);
-        btnBack.setPrefWidth(220);
+        btnStart.setPrefWidth(240);
+        btnBack.setPrefWidth(240);
 
-        // ----------------------------------------------------
-        // BUTTON LOGIC
-        // ----------------------------------------------------
         btnStart.setOnAction(e -> {
-
             Player p1 = cmbPlayer1.getValue();
             Player p2 = cmbPlayer2.getValue();
 
@@ -73,26 +67,45 @@ public class ChoosePlayerView {
                 return;
             }
 
-            GameplayView gameplay = new GameplayView(p1, p2);
-            gameplay.show(new Stage());
+            new GameplayView(p1, p2).show(new Stage());
         });
 
         btnBack.setOnAction(e -> stage.close());
 
-        // ----------------------------------------------------
-        // Layout
-        // ----------------------------------------------------
-        VBox layout = new VBox(15,
-                new Label("Choose Players for the Match:"),
+        VBox layout = new VBox(
+                15,
+                title,
                 cmbPlayer1,
                 cmbPlayer2,
                 btnStart,
                 btnBack
         );
 
-        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+        layout.setPadding(new Insets(30));
 
-        stage.setScene(new Scene(layout, 300, 300));
+        applyBackground(layout);
+
+        Scene scene = new Scene(layout, 360, 360);
+        scene.getStylesheets().add(
+                getClass().getResource("/wartheme.css").toExternalForm()
+        );
+
+        stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
+    }
+
+    private void applyBackground(Pane root) {
+        BackgroundImage bg = new BackgroundImage(
+                new Image(getClass()
+                        .getResource("/images/table_bg.png")
+                        .toExternalForm()),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(100, 100, true, true, true, true)
+        );
+        root.setBackground(new Background(bg));
     }
 }

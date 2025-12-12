@@ -5,11 +5,12 @@ import com.wargame.models.Game;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class GameView {
@@ -21,9 +22,8 @@ public class GameView {
 
         stage.setTitle("Game History");
 
-        // ============================
-        //  TABLE COLUMNS
-        // ============================
+        Label title = new Label("GAME HISTORY");
+        title.getStyleClass().add("title-label");
 
         TableColumn<Game, Integer> colID = new TableColumn<>("Game ID");
         colID.setCellValueFactory(new PropertyValueFactory<>("gameID"));
@@ -56,30 +56,29 @@ public class GameView {
                 colDate, colP1Wins, colP2Wins, colWars
         );
 
-        // Load initial data
         refreshTable();
 
-        // ============================
-        //  BUTTONS
-        // ============================
         Button btnViewRounds = new Button("View Rounds");
-        Button btnRefresh = new Button("Refresh");
-
         btnViewRounds.setOnAction(e -> openRoundViewForSelectedGame());
-        btnRefresh.setOnAction(e -> refreshTable());
 
-        HBox buttonRow = new HBox(10, btnViewRounds, btnRefresh);
-        buttonRow.setPadding(new Insets(10));
+        HBox buttons = new HBox(btnViewRounds);
+        buttons.setAlignment(Pos.CENTER);
+        buttons.setPadding(new Insets(10));
 
-        // ============================
-        //  LAYOUT
-        // ============================
-        BorderPane root = new BorderPane();
-        root.setCenter(table);
-        root.setBottom(buttonRow);
+        VBox center = new VBox(15, title, table, buttons);
+        center.setPadding(new Insets(20));
+        center.setAlignment(Pos.CENTER);
 
-        Scene scene = new Scene(root, 850, 450);
+        BorderPane root = new BorderPane(center);
+        applyBackground(root);
+
+        Scene scene = new Scene(root, 900, 500);
+        scene.getStylesheets().add(
+                getClass().getResource("/wartheme.css").toExternalForm()
+        );
+
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
@@ -90,7 +89,6 @@ public class GameView {
     }
 
     private void openRoundViewForSelectedGame() {
-
         Game selected = table.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
@@ -98,8 +96,22 @@ public class GameView {
             return;
         }
 
-        RoundView rv = new RoundView();
-        Stage roundStage = new Stage();
-        rv.showRoundsForGame(roundStage, selected.getGameID());
+        new RoundView().showRoundsForGame(
+                new Stage(),
+                selected.getGameID()
+        );
+    }
+
+    private void applyBackground(Pane root) {
+        BackgroundImage bg = new BackgroundImage(
+                new Image(getClass()
+                        .getResource("/images/table_bg.png")
+                        .toExternalForm()),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(100, 100, true, true, true, true)
+        );
+        root.setBackground(new Background(bg));
     }
 }

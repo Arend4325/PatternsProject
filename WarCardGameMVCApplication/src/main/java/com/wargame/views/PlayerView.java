@@ -5,12 +5,12 @@ import com.wargame.models.Player;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class PlayerView {
@@ -21,6 +21,9 @@ public class PlayerView {
     public void showPlayerView(Stage stage) {
 
         stage.setTitle("Player Management");
+
+        Label title = new Label("PLAYER MANAGEMENT");
+        title.getStyleClass().add("title-label");
 
         TableColumn<Player, Integer> colID = new TableColumn<>("ID");
         colID.setCellValueFactory(new PropertyValueFactory<>("playerID"));
@@ -40,26 +43,32 @@ public class PlayerView {
         colWins.setCellValueFactory(new PropertyValueFactory<>("totalWins"));
 
         table.getColumns().addAll(colID, colFirst, colLast, colEmail, colWins);
-
         refreshTable();
 
         Button btnAdd = new Button("Add Player");
         Button btnDelete = new Button("Delete Player");
-        Button btnRefresh = new Button("Refresh");
 
         btnAdd.setOnAction(e -> openAddPlayerWindow());
         btnDelete.setOnAction(e -> deleteSelectedPlayer());
-        btnRefresh.setOnAction(e -> refreshTable());
 
-        HBox buttonRow = new HBox(10, btnAdd, btnDelete, btnRefresh);
-        buttonRow.setPadding(new Insets(10));
+        HBox buttons = new HBox(12, btnAdd, btnDelete);
+        buttons.setAlignment(Pos.CENTER);
+        buttons.setPadding(new Insets(10));
 
-        BorderPane root = new BorderPane();
-        root.setCenter(table);
-        root.setBottom(buttonRow);
+        VBox center = new VBox(15, title, table, buttons);
+        center.setPadding(new Insets(20));
+        center.setAlignment(Pos.CENTER);
 
-        Scene scene = new Scene(root, 600, 400);
+        BorderPane root = new BorderPane(center);
+        applyBackground(root);
+
+        Scene scene = new Scene(root, 650, 450);
+        scene.getStylesheets().add(
+                getClass().getResource("/wartheme.css").toExternalForm()
+        );
+
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
@@ -85,7 +94,11 @@ public class PlayerView {
         Button btnSave = new Button("Save");
 
         btnSave.setOnAction(e -> {
-            Player p = new Player(txtFirst.getText(), txtLast.getText(), txtEmail.getText());
+            Player p = new Player(
+                    txtFirst.getText(),
+                    txtLast.getText(),
+                    txtEmail.getText()
+            );
 
             if (playerController.addPlayer(p)) {
                 refreshTable();
@@ -102,8 +115,14 @@ public class PlayerView {
         );
 
         layout.setPadding(new Insets(15));
+        layout.setAlignment(Pos.CENTER);
 
-        window.setScene(new Scene(layout, 300, 250));
+        Scene scene = new Scene(layout, 300, 250);
+        scene.getStylesheets().add(
+                getClass().getResource("/wartheme.css").toExternalForm()
+        );
+
+        window.setScene(scene);
         window.show();
     }
 
@@ -115,14 +134,24 @@ public class PlayerView {
             return;
         }
 
-        boolean deleted = playerController.deletePlayer(selected.getPlayerID());
+        boolean deleted =
+                playerController.deletePlayer(selected.getPlayerID());
 
         if (deleted) {
             refreshTable();
-        } else {
-            new Alert(Alert.AlertType.ERROR,
-                    "Cannot delete player.\n(They may be referenced by past games)"
-            ).show();
         }
+    }
+
+    private void applyBackground(Pane root) {
+        BackgroundImage bg = new BackgroundImage(
+                new Image(getClass()
+                        .getResource("/images/table_bg.png")
+                        .toExternalForm()),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(100, 100, true, true, true, true)
+        );
+        root.setBackground(new Background(bg));
     }
 }

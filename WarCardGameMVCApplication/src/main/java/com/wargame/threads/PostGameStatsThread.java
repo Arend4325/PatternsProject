@@ -23,8 +23,8 @@ public class PostGameStatsThread extends Thread {
             else if (r.winner == 2) p2Wins++;
         }
 
-        System.out.println("\n[Thread 2] Game Statistics");
-        System.out.println("Player 1 round wins: " + p1Wins);
-        System.out.println("Player 2 round wins: " + p2Wins);
+
+        System.out.println("[Thread 2] | Player 1 round wins: " + p1Wins);
+        System.out.println("[Thread 2] | Player 2 round wins: " + p2Wins);
     }
 }

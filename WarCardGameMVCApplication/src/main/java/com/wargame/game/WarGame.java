@@ -140,17 +140,24 @@ public class WarGame {
             Card c1 = p1.getPlayerDeck().dealCard();
             Card c2 = p2.getPlayerDeck().dealCard();
 
+            tableDeck.addToDeck(c1);
+            tableDeck.addToDeck(c2);
+
+
             totalRounds++;
 
             int winner;
             if (c1.getValue() > c2.getValue()) {
                 winner = 1;
-                p1RoundWins++;  // count sudden-death rounds too
+                p1RoundWins++;
+                p1.getPlayerDeck().transferCardsFrom(tableDeck);
             }
             else if (c2.getValue() > c1.getValue()) {
                 winner = 2;
                 p2RoundWins++;
+                p2.getPlayerDeck().transferCardsFrom(tableDeck);
             }
+
             else {
                 winner = 0;
             }
@@ -163,6 +170,7 @@ public class WarGame {
                     winner,
                     winner == 0
             ));
+
 
             if (winner == 1) return p1.getName();
             if (winner == 2) return p2.getName();

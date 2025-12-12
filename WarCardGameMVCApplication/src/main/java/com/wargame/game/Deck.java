@@ -15,8 +15,8 @@ public class Deck {
             }
         }
 
-        cards[index++] = new Joker(1);
-        cards[index] = new Joker(2);
+        cards[index++] = new Joker(14); // jokers always win so value is highest
+        cards[index] = new Joker(14);
 
         numCards = 54;
     }
@@ -43,10 +43,22 @@ public class Deck {
         cards[numCards++] = card;
     }
 
+    //this method makes dealing work like a queue to imitate dealing from the top of the deck (front of the queue) and adding it to the bottom of the deck (end of the queue)
+    //it fixes our issue with the same cards always showing every round
     public Card dealCard() {
         if (numCards == 0) return null;
-        return cards[--numCards];
+
+        Card top = cards[0];
+
+
+        for (int i = 1; i < numCards; i++) {
+            cards[i - 1] = cards[i];
+        }
+
+        cards[--numCards] = null;
+        return top;
     }
+
 
     public Card dealCard(int index) {
         return cards[index];
@@ -57,10 +69,12 @@ public class Deck {
     }
 
     public void transferCardsFrom(Deck other) {
+
         while (other.numCards > 0) {
             this.addToDeck(other.dealCard());
         }
     }
+
 
     public void printDeck() {
         if (numCards == 0) {

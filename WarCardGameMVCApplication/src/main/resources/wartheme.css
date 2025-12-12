@@ -1,0 +1,58 @@
+.root {
+    -fx-background-color: linear-gradient(
+        to bottom right,
+        #0b3d2e,
+        #145a32
+    );
+    -fx-font-family: "Segoe UI", "Arial";
+}
+
+/* ---------- TITLES ---------- */
+.label {
+    -fx-text-fill: #f5f5dc;
+}
+
+.title-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f5f5dc;
+}
+
+/* ---------- TABLE ---------- */
+.table-view {
+    -fx-background-color: rgba(0, 0, 0, 0.35);
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #1e8449;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* ---------- BUTTONS ---------- */
+.button {
+    -fx-background-color: #c9a227; /* gold */
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18 8 18;
+}
+
+.button:hover {
+    -fx-background-color: #f1c40f;
+}
+
+/* ---------- STATUS TEXT ---------- */
+.status-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #f5f5dc;
+}

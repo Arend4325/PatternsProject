@@ -5,10 +5,12 @@ import com.wargame.models.Round;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -21,6 +23,9 @@ public class RoundView {
     public void showRoundsForGame(Stage stage, int gameID) {
 
         stage.setTitle("Rounds for Game #" + gameID);
+
+        Label title = new Label("ROUND HISTORY – GAME #" + gameID);
+        title.getStyleClass().add("title-label");
 
         TableColumn<Round, Integer> colRoundNum = new TableColumn<>("Round #");
         colRoundNum.setCellValueFactory(new PropertyValueFactory<>("roundNumber"));
@@ -42,23 +47,56 @@ public class RoundView {
         colWar.setCellValueFactory(new PropertyValueFactory<>("warRound"));
         colWar.setPrefWidth(80);
 
-        table.getColumns().addAll(colRoundNum, colP1Card, colP2Card, colWinner, colWar);
+        table.getColumns().addAll(
+                colRoundNum,
+                colP1Card,
+                colP2Card,
+                colWinner,
+                colWar
+        );
 
         loadRounds(gameID);
 
-        BorderPane root = new BorderPane();
-        root.setCenter(table);
-        root.setPadding(new Insets(10));
+        Button btnClose = new Button("Close");
+        btnClose.setOnAction(e -> stage.close());
 
-        Scene scene = new Scene(root, 650, 450);
+        HBox buttonRow = new HBox(btnClose);
+        buttonRow.setAlignment(Pos.CENTER);
+        buttonRow.setPadding(new Insets(10));
+
+        VBox center = new VBox(15, title, table, buttonRow);
+        center.setPadding(new Insets(20));
+        center.setAlignment(Pos.CENTER);
+
+        BorderPane root = new BorderPane(center);
+        applyBackground(root);
+
+        Scene scene = new Scene(root, 700, 500);
+        scene.getStylesheets().add(
+                getClass().getResource("/wartheme.css").toExternalForm()
+        );
+
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
     private void loadRounds(int gameID) {
         List<Round> rounds = roundController.getRoundsForGame(gameID);
-
         ObservableList<Round> data = FXCollections.observableArrayList(rounds);
         table.setItems(data);
+    }
+
+    private void applyBackground(Pane root) {
+        BackgroundImage bg = new BackgroundImage(
+                new Image(getClass()
+                        .getResource("/images/table_bg.png")
+                        .toExternalForm()),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(100, 100, true, true, true, true)
+        );
+        root.setBackground(new Background(bg));
     }
 }
