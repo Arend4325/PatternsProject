@@ -26,7 +26,7 @@ The application source is in [`WarCardGameMVCApplication`](WarCardGameMVCApplica
 
 ## My contribution
 
-I built the game by extending an earlier project of mine. For this version, I developed the game logic, organized the application into MVC components, connected it to MySQL, and worked on the graphical interface.
+We built the game by extending an earlier project of mine. For this version, I developed the game logic, organized the application into MVC components, connected it to MySQL, and worked on the graphical interface.
 
 ## Running the project
 
